@@ -8,21 +8,7 @@
 <body>
     <header>
         <h1>Polls</h1>
-        <nav>
-            <ul>
-                <li><a href="index.php">Home</a></li>
-                <li><a href="create_poll.php">Create Poll</a></li>
-                <?php
-                session_start();
-                if (isset($_SESSION['user_id'])) {
-                    echo '<li><a href="logout.php">Logout</a></li>';
-                } else {
-                    echo '<li><a href="login.php">Login</a></li>';
-                    echo '<li><a href="register.php">Register</a></li>';
-                }
-                ?>
-            </ul>
-        </nav>
+        <?php include('nav.php'); display_nav(1); ?>
     </header>
     <main>
         <h2>All Polls</h2>
@@ -43,6 +29,7 @@
             ?>
         </ul>
     </main>
+    <?php include('footer.php'); ?>
 </body>
 </html>
 

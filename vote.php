@@ -4,72 +4,11 @@
     <meta charset="UTF-8">
     <title>Vote</title>
     <link rel="stylesheet" href="styles.css">
-    <style>
-        /* Add styling for the popup */
-        .popup {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-        .popup-content {
-            background-color: #fff;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 500px;
-        }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        .button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            margin: 10px;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            text-decoration: none;
-        }
-        .button:hover {
-            background-color: #45a049;
-        }
-    </style>
 </head>
 <body>
     <header>
         <h1>Vote in Poll</h1>
-        <nav>
-            <ul>
-                <li><a href="index.php">Home</a></li>
-                <li><a href="polls.php">Polls</a></li>
-                <?php
-                session_start();
-                if (isset($_SESSION['user_id'])) {
-                    echo '<li><a href="create_poll.php">Create Poll</a></li>';
-                    echo '<li><a href="logout.php">Logout</a></li>';
-                } else {
-                    echo '<li><a href="login.php">Login</a></li>';
-                    echo '<li><a href="register.php">Register</a></li>';
-                }
-                ?>
-            </ul>
-        </nav>
+        <?php include('nav.php'); display_nav(1); ?>
     </header>
     <main>
         <?php
@@ -177,6 +116,7 @@
         }
         ?>
     </main>
+    <?php include('footer.php'); ?>
 
     <!-- Popup Modal -->
     <div id="loginPopup" class="popup">
@@ -187,6 +127,14 @@
             <button class="button" onclick="location.href='login.php'">Log In</button>
             <div class="message">If not, you can register here:</div>
             <button class="button" onclick="location.href='register.php'">Register</button>
+        </div>
+    </div>
+
+    <div id="successPopup" class="popup">
+        <div class="popup-content">
+            <span class="close" onclick="closePopup()">&times;</span>
+            <div class="message">Vote recorded successfully!</div>
+            <button class="button" onclick="location.href='view_results.php?poll_id=<?php echo $poll_id; ?>'">View Results</button>
         </div>
     </div>
 
@@ -201,8 +149,17 @@
 
         function closePopup() {
             document.getElementById('loginPopup').style.display = 'none';
+            document.getElementById('successPopup').style.display = 'none';
         }
+
+        function showSuccessPopup() {
+            document.getElementById('successPopup').style.display = 'block';
+        }
+
+        <?php if (isset($_SESSION['vote_successful']) && $_SESSION['vote_successful']): ?>
+            showSuccessPopup();
+            <?php unset($_SESSION['vote_successful']); ?>
+        <?php endif; ?>
     </script>
 </body>
 </html>
-

@@ -3,43 +3,27 @@ session_start();
 include('db_connect.php');
 
 if (!isset($_SESSION['user_id'])) {
-    echo "You must be logged in to create a poll.";
+    echo "You must be logged in to leave a comment.";
     exit;
 }
 
-// Function to sanitize user input
-function test_input($data) {
-    return htmlspecialchars(stripslashes(trim($data)));
-}
-
-// Get and sanitize form data
+// Get form data
+$poll_id = intval($_POST['poll_id']);
+$comment_text = htmlspecialchars($_POST['comment_text']);
 $user_id = $_SESSION['user_id'];
-$question = test_input($_POST['question']);
-$contact = test_input($_POST['contact']);
-$options = explode("\n", test_input($_POST['options']));
 
-// Insert poll question and contact into polls table
-$sql = "INSERT INTO polls (user_id, question, contact) VALUES (?, ?, ?)";
+// Insert comment into database
+$sql = "INSERT INTO comments (poll_id, user_id, comment_text) VALUES (?, ?, ?)";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("iss", $user_id, $question, $contact);
+$stmt->bind_param("iis", $poll_id, $user_id, $comment_text);
 
 if ($stmt->execute()) {
-    $poll_id = $stmt->insert_id;
-
-    // Insert options into options table
-    $sql = "INSERT INTO options (poll_id, option_text) VALUES (?, ?)";
-    $stmt = $conn->prepare($sql);
-
-    foreach ($options as $option) {
-        $stmt->bind_param("is", $poll_id, $option);
-        $stmt->execute();
-    }
-
-    echo "Poll created successfully!";
-    header('Location: polls.php');
+    echo "Comment submitted successfully!";
+    header("Location: vote.php?poll_id=" . $poll_id);
     exit;
 } else {
     echo "Error: " . $stmt->error;
 }
 ?>
+
 

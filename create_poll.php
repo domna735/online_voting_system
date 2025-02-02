@@ -8,14 +8,7 @@
 <body>
     <header>
         <h1>Create Poll</h1>
-        <nav>
-            <ul>
-                <li><a href="index.php">Home</a></li>
-                <li><a href="polls.php">Polls</a></li>
-                <li><a href="login.php">Login</a></li>
-                <li><a href="register.php">Register</a></li>
-            </ul>
-        </nav>
+        <?php include('nav.php'); display_nav(3); ?>
     </header>
     <main>
         <form action="create_poll_process.php" method="POST">
@@ -28,6 +21,9 @@
             <button type="submit">Create Poll</button>
         </form>
     </main>
+    <?php include('footer.php'); ?>
 </body>
 </html>
+
+
 

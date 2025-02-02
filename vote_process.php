@@ -24,21 +24,26 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
-    echo "You have already voted in this poll.";
-    exit;
+    // User has already voted, update their vote
+    $sql = "UPDATE votes SET option_id = ?, voted_at = CURRENT_TIMESTAMP WHERE poll_id = ? AND user_id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("iii", $option_id, $poll_id, $user_id);
+} else {
+    // User has not voted, insert a new vote
+    $sql = "INSERT INTO votes (poll_id, option_id, user_id) VALUES (?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("iii", $poll_id, $option_id, $user_id);
 }
 
-// Record the vote
-$sql = "INSERT INTO votes (poll_id, option_id, user_id) VALUES (?, ?, ?)";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("iii", $poll_id, $option_id, $user_id);
-
 if ($stmt->execute()) {
-    echo "Vote recorded successfully!";
-    header("Location: view_results.php?poll_id=" . $poll_id);
+    header("Location: vote.php?poll_id=" . $poll_id . "&success=1");
     exit;
 } else {
     echo "Error: " . $stmt->error;
 }
 ?>
+
+
+
+
 
