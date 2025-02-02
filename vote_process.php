@@ -3,7 +3,11 @@ session_start();
 include('db_connect.php');
 
 if (!isset($_SESSION['user_id'])) {
-    echo "You must be logged in to vote.";
+    echo "<div class='message'>You must be logged in to vote.</div>";
+    echo "<div class='message'>Do you have an account?</div>";
+    echo "<button class='button' onclick=\"location.href='login.php'\">Log In</button>";
+    echo "<div class='message'>If not, you can register here:</div>";
+    echo "<button class='button' onclick=\"location.href='register.php'\">Register</button>";
     exit;
 }
 
@@ -37,3 +41,4 @@ if ($stmt->execute()) {
     echo "Error: " . $stmt->error;
 }
 ?>
+

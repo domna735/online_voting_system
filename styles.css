@@ -65,6 +65,28 @@ main {
     background-color: #45a049;
 }
 
+.message {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    margin: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    text-decoration: none;
+}
+
+.button:hover {
+    background-color: #45a049;
+}
+
 /* Footer Styles */
 footer {
     background-color: #333;

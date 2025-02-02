@@ -21,6 +21,8 @@
         <form action="create_poll_process.php" method="POST">
             <label for="question">Poll Question:</label><br>
             <textarea id="question" name="question" required></textarea><br><br>
+            <label for="content">Content:</label><br>
+            <textarea id="content" name="content" required></textarea><br><br>
             <label for="options">Options (one per line):</label><br>
             <textarea id="options" name="options" required></textarea><br><br>
             <button type="submit">Create Poll</button>
@@ -28,3 +30,4 @@
     </main>
 </body>
 </html>
+

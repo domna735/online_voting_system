@@ -15,12 +15,13 @@ function test_input($data) {
 // Get and sanitize form data
 $user_id = $_SESSION['user_id'];
 $question = test_input($_POST['question']);
+$content = test_input($_POST['content']);
 $options = explode("\n", test_input($_POST['options']));
 
-// Insert poll question into polls table
-$sql = "INSERT INTO polls (user_id, question) VALUES (?, ?)";
+// Insert poll question and content into polls table
+$sql = "INSERT INTO polls (user_id, question, content) VALUES (?, ?, ?)";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("is", $user_id, $question);
+$stmt->bind_param("iss", $user_id, $question, $content);
 
 if ($stmt->execute()) {
     $poll_id = $stmt->insert_id;
