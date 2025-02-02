@@ -24,7 +24,8 @@ if ($result->num_rows === 1) {
     if (password_verify($password, $user['password'])) {
         $_SESSION['user_id'] = $user['user_id'];
         $_SESSION['nickname'] = $user['nickname'];
-        echo "Login successful!";
+        $_SESSION['login_success'] = true; // Set a flag to indicate successful login
+        
         header('Location: index.php');
         exit;
     } else {
@@ -34,4 +35,5 @@ if ($result->num_rows === 1) {
     echo "User not found.";
 }
 ?>
+
 
