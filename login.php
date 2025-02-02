@@ -8,13 +8,7 @@
 <body>
     <header>
         <h1>Login</h1>
-        <nav>
-            <ul>
-                <li><a href="index.php">Home</a></li>
-                <li><a href="polls.php">Polls</a></li>
-                <li><a href="register.php">Register</a></li>
-            </ul>
-        </nav>
+        <?php include('nav.php'); display_nav(2); ?>
     </header>
     <main>
         <form action="login_process.php" method="POST">
@@ -25,6 +19,8 @@
             <button type="submit">Login</button>
         </form>
     </main>
+    <?php include('footer.php'); ?>
 </body>
 </html>
+
 

@@ -2,35 +2,54 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Online Voting System</title>
+    <title>Home</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Header Section -->
     <header>
-        <h1>Welcome to the Online Voting Platform</h1>
-        <nav>
-            <ul>
-                <li><a href="index.php">Home</a></li>
-                <li><a href="polls.php">Polls</a></li>
-                <li><a href="create_poll.php">Create Poll</a></li>
-                <li><a href="login.php">Login/Register</a></li>
-            </ul>
-        </nav>
+        <h1>Online Voting System</h1>
+        <?php include('nav.php'); display_nav(1); ?>
     </header>
-
-    <!-- Main Content -->
     <main>
-        <section class="intro">
-            <h2>Create, Vote, and Discover Opinions</h2>
-            <p>Join our community to express your views and see what others think.</p>
-            <a href="register.php" class="btn">Get Started</a>
-        </section>
-    </main>
+        <h2>Welcome to the Online Voting System!</h2>
+        <?php
+        if (isset($_SESSION['user_id']) && isset($_SESSION['nickname'])) {
+            echo "<p>Welcome, " . htmlspecialchars($_SESSION['nickname']) . "! You have successfully logged in.</p>";
+        }
+        ?>
 
-    <!-- Footer Section -->
-    <footer>
-        <p>&copy; 2023 Online Voting System. All rights reserved.</p>
-    </footer>
+        <h2>All Polls</h2>
+        <ul>
+            <?php
+            include('db_connect.php');
+            $sql = "SELECT polls.poll_id, polls.question, users.nickname AS creator
+                    FROM polls
+                    JOIN users ON polls.user_id = users.user_id";
+            $result = $conn->query($sql);
+            if ($result->num_rows > 0) {
+                while ($row = $result->fetch_assoc()) {
+                    echo "<li>" . $row['question'] . " <em>by " . $row['creator'] . "</em> <a href='vote.php?poll_id=" . $row['poll_id'] . "'>Vote</a> <a href='view_results.php?poll_id=" . $row['poll_id'] . "'>View Results</a></li>";
+                }
+            } else {
+                echo "No polls found.";
+            }
+            ?>
+        </ul>
+        <br>
+        <?php
+        if (isset($_SESSION['user_id'])) {
+            echo '<a href="create_poll.php" class="btn">Create Poll</a>';
+        }
+        ?>
+    </main>
+    <?php include('footer.php'); ?>
 </body>
 </html>
+
+
+
+
+
+
+
+
