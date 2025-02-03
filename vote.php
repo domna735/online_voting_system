@@ -31,6 +31,21 @@
             $poll = $result->fetch_assoc();
             echo "<h2>" . $poll['question'] . "</h2>";
             echo "<p><em>Created by " . $poll['creator'] . "</em></p>";
+            
+            // Fetch profile picture URL
+            $sql = "SELECT profile_pic FROM users WHERE nickname = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("s", $poll['creator']);
+            $stmt->execute();
+            $profile_result = $stmt->get_result();
+            
+            if ($profile_result->num_rows > 0) {
+                $profile = $profile_result->fetch_assoc();
+                if (!empty($profile['profile_pic'])) {
+                    echo '<img src="' . htmlspecialchars($profile['profile_pic']) . '" alt="Profile Picture" width="100"><br>';
+                }
+            }
+            
             echo "<p><em>Content: " . $poll['content'] . "</em></p>";
             
             // Fetch poll options
@@ -53,7 +68,7 @@
             } else {
                 echo "No options available for this poll.";
             }
-
+        
             // Fetch vote details
             $sql = "SELECT votes.option_id, votes.user_id, votes.voted_at, users.nickname
                     FROM votes
@@ -63,9 +78,9 @@
             $stmt->bind_param("i", $poll_id);
             $stmt->execute();
             $result = $stmt->get_result();
-
+        
             $total_votes = $result->num_rows;
-
+        
             echo "<h3>Total Votes: $total_votes</h3>";
             if ($total_votes > 0) {
                 echo "<ul>";
@@ -76,7 +91,7 @@
             } else {
                 echo "<p>No votes yet.</p>";
             }
-
+        
             // Fetch comments
             $sql = "SELECT comments.comment_text, users.nickname, comments.created_at
                     FROM comments
@@ -87,9 +102,9 @@
             $stmt->bind_param("i", $poll_id);
             $stmt->execute();
             $result = $stmt->get_result();
-
+        
             $total_comments = $result->num_rows;
-
+        
             echo "<h3>Comments ($total_comments)</h3>";
             if ($total_comments > 0) {
                 while ($comment = $result->fetch_assoc()) {
@@ -98,7 +113,7 @@
             } else {
                 echo "<p>No comments yet. Be the first to comment!</p>";
             }
-
+        
             // Comment form
             if (isset($_SESSION['user_id'])) {
                 echo '<h3>Leave a Comment</h3>';
@@ -110,10 +125,11 @@
             } else {
                 echo "<p><a href='login.php'>Log in</a> to leave a comment.</p>";
             }
-
+        
         } else {
             echo "Poll not found.";
         }
+        
         ?>
     </main>
     <?php include('footer.php'); ?>

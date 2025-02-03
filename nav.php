@@ -1,6 +1,8 @@
 <?php
 function display_nav($type) {
-    session_start();
+    if (session_status() == PHP_SESSION_NONE) {
+        session_start();
+    }
     if ($type == 1) { 
         // Used in home page (index.php)
         // edit poll page (edit_poll.php)
@@ -55,5 +57,6 @@ function display_nav($type) {
     }
 }
 ?>
+
 
 
