@@ -48,11 +48,8 @@
                 echo '<a href="login.php" class="btn">Get Started</a>';
             }
             ?>
-        </section>
-        
+        </section>       
     </main>
     <?php include('footer.php'); ?>
 </body>
 </html>
-
-
