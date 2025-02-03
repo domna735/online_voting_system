@@ -18,7 +18,7 @@
         $poll_id = intval($_GET['poll_id']);
         
         // Fetch poll question and creator
-        $sql = "SELECT polls.question, users.nickname AS creator
+        $sql = "SELECT polls.question, users.nickname AS creator, users.profile_pic
                 FROM polls
                 JOIN users ON polls.user_id = users.user_id
                 WHERE polls.poll_id = ?";
@@ -31,6 +31,11 @@
             $poll = $result->fetch_assoc();
             echo "<h2>" . $poll['question'] . "</h2>";
             echo "<p><em>Created by " . $poll['creator'] . "</em></p>";
+            
+            // Display profile picture if available
+            if (!empty($poll['profile_pic'])) {
+                echo '<img src="' . htmlspecialchars($poll['profile_pic']) . '" alt="Profile Picture" width="100"><br>';
+            }
 
             // Fetch poll options and vote counts
             $sql = "SELECT options.option_text, COUNT(votes.option_id) as vote_count
@@ -82,6 +87,7 @@
     <?php include('footer.php'); ?>
 </body>
 </html>
+
 
 
 
