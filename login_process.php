@@ -29,9 +29,11 @@ if ($result->num_rows === 1) {
         header('Location: index.php');
         exit;
     } else {
-        echo "Incorrect password.";
+        header('Location: login_error.php');
+        exit;
     }
 } else {
-    echo "User not found.";
+    header('Location: login_error.php');
+    exit;
 }
 ?>

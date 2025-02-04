@@ -46,6 +46,8 @@
                 <input type="file" id="profile_picture" name="profile_picture"><br><br>
                 <label for="password">Password (leave blank to keep current password):</label><br>
                 <input type="password" id="password" name="password"><br><br>
+                <label for="confirm_password">Confirm Password:</label><br>
+                <input type="password" id="confirm_password" name="confirm_password"><br><br>
                 <button type="submit">Update Profile</button>
             </form>
 
@@ -58,3 +60,4 @@
     <?php include('footer.php'); ?>
 </body>
 </html>
+

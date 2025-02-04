@@ -17,7 +17,15 @@ $login_id = test_input($_POST['login_id']);
 $nickname = test_input($_POST['nickname']);
 $email = test_input($_POST['email']);
 $password = $_POST['password']; // Password will be hashed if provided
+$confirm_password = $_POST['confirm_password']; // Get confirm password
 $user_id = $_SESSION['user_id'];
+
+// Check if passwords match
+if (!empty($password) && $password !== $confirm_password) {
+    header('Location: password_mismatch.php?source=profile');
+    exit;
+}
+
 
 // Handle file upload for profile picture
 $profile_pic = '';
@@ -61,7 +69,7 @@ if ($result->num_rows > 0) {
 
 // Update user data
 $sql = "UPDATE users SET login_id = ?, nickname = ?, email = ?, profile_pic = ? WHERE user_id = ?";
-if ($password) {
+if (!empty($password)) {
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
     $sql = "UPDATE users SET login_id = ?, nickname = ?, email = ?, profile_pic = ?, password = ? WHERE user_id = ?";
     $stmt = $conn->prepare($sql);
@@ -79,3 +87,4 @@ if ($stmt->execute()) {
     echo "Error: " . $stmt->error;
 }
 ?>
+

@@ -57,6 +57,3 @@ function display_nav($type) {
     }
 }
 ?>
-
-
-

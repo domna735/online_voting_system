@@ -22,6 +22,8 @@
             <input type="file" id="profile_picture" name="profile_picture"><br><br>
             <label for="password">Password:</label><br>
             <input type="password" id="password" name="password" required><br><br>
+            <label for="confirm_password">Confirm Password:</label><br>
+            <input type="password" id="confirm_password" name="confirm_password" required><br><br>
             <button type="submit">Register</button>
         </form>
     </main>

@@ -79,6 +79,20 @@
             } else {
                 echo "<p>No comments yet. Be the first to comment!</p>";
             }
+
+            // Comment form
+            if (isset($_SESSION['user_id'])) {
+                echo '<h3>Leave a Comment</h3>';
+                echo '<form action="comment_process.php" method="POST">';
+                echo '<input type="hidden" name="poll_id" value="' . $poll_id . '">';
+                echo '<textarea name="comment_text" required></textarea><br>';
+                echo '<button type="submit">Submit Comment</button>';
+                echo '</form>';
+                } 
+                 else {
+                     echo "<p><a href='login.php'>Log in</a> to leave a comment.</p>";
+                }
+
         } else {
             echo "Poll not found.";
         }

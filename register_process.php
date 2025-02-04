@@ -11,7 +11,15 @@ function test_input($data) {
 $login_id = test_input($_POST['login_id']);
 $nickname = test_input($_POST['nickname']);
 $email = test_input($_POST['email']);
-$password = $_POST['password']; // Password will be hashed, no need to sanitize yet
+$password = $_POST['password'];
+$confirm_password = $_POST['confirm_password']; // Get confirm password
+
+// Check if passwords match
+if ($password !== $confirm_password) {
+    header('Location: password_mismatch.php?source=register');
+    exit;
+}
+
 
 // Handle file upload for profile picture
 $profile_pic = '';
@@ -49,7 +57,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
-    echo "Login ID or Email already exists.";
+    header('Location: duplicate_user.php');
     exit;
 }
 
@@ -71,4 +79,6 @@ if ($stmt->execute()) {
     echo "Error: " . $stmt->error;
 }
 ?>
+
+
 
