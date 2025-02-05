@@ -7,12 +7,12 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Get form data
+// Get data
 $poll_id = intval($_POST['poll_id']);
 $comment_text = htmlspecialchars($_POST['comment_text']);
 $user_id = $_SESSION['user_id'];
 
-// Insert comment into database
+// Insert comment database
 $sql = "INSERT INTO comments (poll_id, user_id, comment_text) VALUES (?, ?, ?)";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("iis", $poll_id, $user_id, $comment_text);

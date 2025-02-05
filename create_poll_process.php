@@ -18,7 +18,7 @@ $question = test_input($_POST['question']);
 $content = test_input($_POST['content']);
 $options = explode("\n", test_input($_POST['options']));
 
-// Insert poll question and content into polls table
+// Insert poll question and content polls table
 $sql = "INSERT INTO polls (user_id, question, content) VALUES (?, ?, ?)";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("iss", $user_id, $question, $content);
@@ -26,7 +26,7 @@ $stmt->bind_param("iss", $user_id, $question, $content);
 if ($stmt->execute()) {
     $poll_id = $stmt->insert_id;
 
-    // Insert options into options table
+    // Insert options to options table
     $sql = "INSERT INTO options (poll_id, option_text) VALUES (?, ?)";
     $stmt = $conn->prepare($sql);
 

@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Get poll ID from URL
+// Get poll ID and user ID
 $poll_id = intval($_GET['poll_id']);
 $user_id = $_SESSION['user_id'];
 
