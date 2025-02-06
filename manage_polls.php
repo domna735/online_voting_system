@@ -27,6 +27,7 @@
         $stmt->execute();
         $result = $stmt->get_result();
 
+        echo "<h2>Your Created Polls</h2>";
         if ($result->num_rows > 0) {
             echo "<ul>";
             while ($row = $result->fetch_assoc()) {
@@ -39,6 +40,30 @@
             echo "</ul>";
         } else {
             echo "You haven't created any polls yet.";
+        }
+
+        // Fetch polls voted by the logged-in user
+        $sql = "SELECT DISTINCT polls.poll_id, polls.question 
+                FROM polls 
+                JOIN votes ON polls.poll_id = votes.poll_id 
+                WHERE votes.user_id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        echo "<h2>Polls You Voted On</h2>";
+        if ($result->num_rows > 0) {
+            echo "<ul>";
+            while ($row = $result->fetch_assoc()) {
+                echo "<li>" . $row['question'] . " 
+                    <a href='vote.php?poll_id=" . $row['poll_id'] . "'>View</a> 
+                    <a href='view_results.php?poll_id=" . $row['poll_id'] . "'>View Results</a>
+                </li>";
+            }
+            echo "</ul>";
+        } else {
+            echo "You haven't voted on any polls yet.";
         }
         ?>
     </main>
