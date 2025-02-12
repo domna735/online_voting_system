@@ -16,7 +16,8 @@
             <input type="text" id="login_id" name="login_id" required><br><br>
             <label for="password">Password:</label><br>
             <input type="password" id="password" name="password" required><br><br>
-            <button type="submit">Login</button>
+            <button type="submit">Login</button><br><br>
+            <a href="Forget_password.php">Forget Password</a>
         </form>
     </main>
     <?php include('footer.php'); ?>
