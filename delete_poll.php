@@ -2,43 +2,77 @@
 session_start();
 include('db_connect.php');
 
+// Ensure the user is logged in; otherwise, redirect.
 if (!isset($_SESSION['user_id'])) {
-    echo "You must be logged in to delete a poll.";
+    header("Location: login.php?error=NotLoggedIn");
     exit;
 }
 
-// Get poll ID and user ID
+// CSRF token verification
+if (!isset($_GET['csrf_token']) || $_GET['csrf_token'] !== $_SESSION['csrf_token']) {
+    header("Location: error.php?error=InvalidCSRFToken");
+    exit;
+}
+
+// Get poll ID from URL and cast it to an integer
 $poll_id = intval($_GET['poll_id']);
 $user_id = $_SESSION['user_id'];
 
-// Check if the poll belongs to the logged-in user
-$sql = "SELECT * FROM polls WHERE poll_id = ? AND user_id = ?";
+// Verify poll ownership
+$sql = "SELECT poll_id FROM polls WHERE poll_id = ? AND user_id = ?";
 $stmt = $conn->prepare($sql);
+if (!$stmt) {
+    error_log("Prepare failed (verify ownership): " . $conn->error);
+    header("Location: error.php?error=DBError");
+    exit;
+}
 $stmt->bind_param("ii", $poll_id, $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
-    // Delete the poll and associated options and votes
-    $sql = "DELETE FROM polls WHERE poll_id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $poll_id);
-    $stmt->execute();
-
-    $sql = "DELETE FROM options WHERE poll_id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $poll_id);
-    $stmt->execute();
-
-    $sql = "DELETE FROM votes WHERE poll_id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $poll_id);
-    $stmt->execute();
-
-    echo "Poll deleted successfully.";
-    header("Location: manage_polls.php");
-    exit;
+    // Use a transaction to delete the poll and all associated data atomically
+    $conn->begin_transaction();
+    try {
+        // Delete poll record
+        $stmt_del = $conn->prepare("DELETE FROM polls WHERE poll_id = ?");
+        if (!$stmt_del) {
+            throw new Exception($conn->error);
+        }
+        $stmt_del->bind_param("i", $poll_id);
+        $stmt_del->execute();
+        $stmt_del->close();
+        
+        // Delete poll options
+        $stmt_opt = $conn->prepare("DELETE FROM options WHERE poll_id = ?");
+        if (!$stmt_opt) {
+            throw new Exception($conn->error);
+        }
+        $stmt_opt->bind_param("i", $poll_id);
+        $stmt_opt->execute();
+        $stmt_opt->close();
+        
+        // Delete poll votes
+        $stmt_votes = $conn->prepare("DELETE FROM votes WHERE poll_id = ?");
+        if (!$stmt_votes) {
+            throw new Exception($conn->error);
+        }
+        $stmt_votes->bind_param("i", $poll_id);
+        $stmt_votes->execute();
+        $stmt_votes->close();
+        
+        // Commit the transaction if all deletions succeed
+        $conn->commit();
+        header("Location: manage_polls.php?message=PollDeleted");
+        exit;
+    } catch (Exception $e) {
+        $conn->rollback();
+        error_log("Deletion transaction failed: " . $e->getMessage());
+        header("Location: error.php?error=DeleteFailed");
+        exit;
+    }
 } else {
-    echo "You do not have permission to delete this poll.";
+    header("Location: error.php?error=NoPermission");
+    exit;
 }
 ?>

@@ -1,3 +1,9 @@
+<?php
+session_start();
+
+// Validate the 'source' input to prevent security risks
+$source = isset($_GET['source']) ? htmlspecialchars($_GET['source'], ENT_QUOTES, 'UTF-8') : '';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,15 +21,11 @@
         <div id="passwordMismatchPopup" class="popup" style="display: block;">
             <div class="popup-content">
                 <span class="close" onclick="closePopup()">&times;</span>
-                <?php if ($_GET['source'] === 'profile') { ?>
-                    <div class="message">Passwords do not match.</div>
-                    <div class="message">Please re-enter your password and confirm password.</div>
-                    <button class="button" onclick="location.href='manage_profile.php'">Manage Profile</button>
-                <?php } else { ?>
-                    <div class="message">Passwords do not match.</div>
-                    <div class="message">Please re-enter your password and confirm password.</div>
-                    <button class="button" onclick="location.href='register.php'">Register</button>
-                <?php } ?>
+                <div class="message">Passwords do not match.</div>
+                <div class="message">Please re-enter your password and confirm password.</div>
+                <button class="button" onclick="location.href='<?php echo ($source === 'profile') ? 'manage_profile.php' : 'register.php'; ?>'">
+                    <?php echo ($source === 'profile') ? 'Manage Profile' : 'Register'; ?>
+                </button>
             </div>
         </div>
     </main>

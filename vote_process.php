@@ -2,45 +2,81 @@
 session_start();
 include('db_connect.php');
 
+// Ensure the user is logged in
 if (!isset($_SESSION['user_id'])) {
-    echo "<div class='message'>You must be logged in to vote.</div>";
-    echo "<div class='message'>Do you have an account?</div>";
-    echo "<button class='button' onclick=\"location.href='login.php'\">Log In</button>";
-    echo "<div class='message'>If not, you can register here:</div>";
-    echo "<button class='button' onclick=\"location.href='register.php'\">Register</button>";
+    header("Location: login.php");
     exit;
 }
 
-// Get form data
-$poll_id = intval($_POST['poll_id']);
-$option_id = intval($_POST['option_id']);
-$user_id = $_SESSION['user_id'];
+// Validate CSRF token
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+    header("Location: error.php?error=InvalidCSRFToken");
+    exit;
+}
+
+// Retrieve and validate form data
+$poll_id   = isset($_POST['poll_id'])   ? intval($_POST['poll_id'])   : 0;
+$option_id = isset($_POST['option_id']) ? intval($_POST['option_id']) : 0;
+$user_id   = $_SESSION['user_id'];
+
+if ($poll_id <= 0 || $option_id <= 0) {
+    header("Location: error.php?error=InvalidVoteInput");
+    exit;
+}
+
+// Verify that the selected option exists for this poll
+$sql = "SELECT option_id FROM options WHERE poll_id = ? AND option_id = ?";
+$stmt = $conn->prepare($sql);
+if (!$stmt) {
+    error_log("Prepare failed (validate option): " . $conn->error);
+    header("Location: error.php?error=DBError");
+    exit;
+}
+$stmt->bind_param("ii", $poll_id, $option_id);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows === 0) {
+    header("Location: error.php?error=InvalidVoteOption");
+    exit;
+}
+$stmt->close();
 
 // Check if the user has already voted in this poll
-$sql = "SELECT * FROM votes WHERE poll_id = ? AND user_id = ?";
+$sql = "SELECT vote_id FROM votes WHERE poll_id = ? AND user_id = ?";
 $stmt = $conn->prepare($sql);
+if (!$stmt) {
+    error_log("Prepare failed (check existing vote): " . $conn->error);
+    header("Location: error.php?error=DBError");
+    exit;
+}
 $stmt->bind_param("ii", $poll_id, $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
+$has_voted = ($result->num_rows > 0);
+$stmt->close();
 
-if ($result->num_rows > 0) {
-    // User has already voted, update their vote
+// Insert a new vote or update an existing one
+if ($has_voted) {
     $sql = "UPDATE votes SET option_id = ?, voted_at = CURRENT_TIMESTAMP WHERE poll_id = ? AND user_id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("iii", $option_id, $poll_id, $user_id);
 } else {
-    // User has not voted, insert a new vote
     $sql = "INSERT INTO votes (poll_id, option_id, user_id) VALUES (?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("iii", $poll_id, $option_id, $user_id);
 }
-
-if ($stmt->execute()) {
-    // Set session variable for successful vote to trigger popup in vote.php
-    $_SESSION['vote_successful'] = true;
-    header("Location: vote.php?poll_id=" . $poll_id);
+$stmt = $conn->prepare($sql);
+if (!$stmt) {
+    error_log("Prepare failed (vote insert/update): " . $conn->error);
+    header("Location: error.php?error=DBError");
     exit;
-} else {
-    echo "Error: " . $stmt->error;
 }
+$stmt->bind_param("iii", $option_id, $poll_id, $user_id);
+if (!$stmt->execute()) {
+    error_log("Vote submission failed: " . $stmt->error);
+    header("Location: error.php?error=VoteFailed");
+    exit;
+}
+$stmt->close();
+
+// Set a session flag for successful voting and redirect
+$_SESSION['vote_successful'] = true;
+header("Location: vote.php?poll_id=" . $poll_id);
+exit;
 ?>
