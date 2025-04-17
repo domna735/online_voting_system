@@ -1,139 +1,199 @@
-/* General Styles */
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+/* Reset and Base Styles */
+* {
+    box-sizing: border-box;
     margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f9f9f9;
     color: #333;
+    line-height: 1.6;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-}
-
-.container {
+    padding: 0 10px;
+  }
+  
+  /* Container for central alignment */
+  .container {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-header {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  
+  /* Header */
+  header {
     background-color: #4caf50;
     color: white;
     padding: 20px 0;
     text-align: center;
-}
-
-nav ul {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  
+  /* Navigation */
+  nav ul {
     list-style: none;
-    padding: 0;
     display: flex;
     justify-content: center;
     background-color: #45a049;
-}
-
-nav ul li {
+    padding: 10px 0;
+    margin: 0;
+  }
+  
+  nav ul li {
     margin: 0 15px;
-}
-
-nav ul li a {
+  }
+  
+  nav ul li a {
     color: white;
     text-decoration: none;
     font-weight: bold;
-}
-
-nav ul li a:hover {
+    transition: color 0.3s ease;
+  }
+  
+  nav ul li a:hover {
+    color: #ffeb3b;
     text-decoration: underline;
-}
-
-main {
+  }
+  
+  /* Main Content */
+  main {
     flex: 1;
     padding: 50px 20px;
     text-align: center;
-}
-
-.intro h2 {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .intro h2 {
     font-size: 2em;
     margin-bottom: 20px;
-}
-
-.intro p {
+  }
+  
+  .intro p {
     font-size: 1.2em;
     margin-bottom: 30px;
-}
-
-.btn {
+  }
+  
+  /* Buttons and Links */
+  .btn, .button {
     background-color: #4caf50;
     color: white;
     padding: 15px 30px;
-    text-decoration: none;
+    border: none;
     border-radius: 5px;
     font-size: 1em;
-}
-
-.btn:hover {
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+  }
+  
+  .btn:hover, .button:hover {
     background-color: #45a049;
-}
-
-.message {
+    transform: scale(1.05);
+  }
+  
+  /* If you need inline buttons that look like links */
+  .link-button {
+    background: none;
+    border: none;
+    color: #4caf50;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: inherit;
+    font-family: inherit;
+    padding: 0;
+    margin: 0 5px;
+  }
+  
+  .link-button:hover {
+    color: #45a049;
+  }
+  
+  /* Display Message */
+  .message {
     font-family: Arial, sans-serif;
     font-size: 16px;
     color: #333;
     margin-bottom: 20px;
-}
-
-.button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 20px;
-    margin: 10px;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    text-decoration: none;
-}
-
-.button:hover {
-    background-color: #45a049;
-}
-
-/* Footer Styles */
-footer {
+  }
+  
+  /* Form Elements */
+  input, textarea, select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    font-size: 1em;
+    border-radius: 4px;
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 10px;
+  }
+  
+  input:focus, textarea:focus, select:focus {
+    border-color: #4caf50;
+    outline: none;
+  }
+  
+  /* Footer */
+  footer {
     background-color: #333;
     color: white;
-    padding: 10px 0; /* Reduced padding */
+    padding: 10px 0;
     text-align: center;
-    font-size: 0.8em; /* Reduced font size */
+    font-size: 0.8em;
     width: 100%;
-    margin-top: auto; /* Ensures the footer sticks to the bottom when there's little content */
-}
-
-/* Add styling for the popup */
-.popup {
+    margin-top: auto;
+  }
+  
+  /* Popup Styles */
+  .popup {
     display: none;
     position: fixed;
-    z-index: 1;
+    z-index: 999;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.5);
-}
-.popup-content {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  
+  .popup-content {
     background-color: #fff;
     margin: 15% auto;
     padding: 20px;
     border: 1px solid #888;
     width: 80%;
     max-width: 500px;
-}
-.close {
+  }
+  
+  .close {
     color: #aaa;
     float: right;
     font-size: 28px;
     font-weight: bold;
-}
-.close:hover,
-.close:focus {
+  }
+  
+  .close:hover,
+  .close:focus {
     color: black;
     text-decoration: none;
     cursor: pointer;
-}
+  }
+  
+  /* Responsive Design */
+  @media screen and (max-width: 768px) {
+    nav ul {
+      flex-direction: column;
+    }
+    nav ul li {
+      margin: 10px 0;
+    }
+    main {
+      padding: 30px 10px;
+    }
+  }

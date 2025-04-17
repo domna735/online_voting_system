@@ -8,14 +8,14 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// CSRF token verification
-if (!isset($_GET['csrf_token']) || $_GET['csrf_token'] !== $_SESSION['csrf_token']) {
+// CSRF token verification using POST
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
     header("Location: error.php?error=InvalidCSRFToken");
     exit;
 }
 
-// Get poll ID from URL and cast it to an integer
-$poll_id = intval($_GET['poll_id']);
+// Get poll ID from POST data and cast it to an integer
+$poll_id = intval($_POST['poll_id']);
 $user_id = $_SESSION['user_id'];
 
 // Verify poll ownership
@@ -34,7 +34,7 @@ if ($result->num_rows > 0) {
     // Use a transaction to delete the poll and all associated data atomically
     $conn->begin_transaction();
     try {
-        // Delete poll record
+        // Delete the poll record
         $stmt_del = $conn->prepare("DELETE FROM polls WHERE poll_id = ?");
         if (!$stmt_del) {
             throw new Exception($conn->error);
@@ -61,7 +61,7 @@ if ($result->num_rows > 0) {
         $stmt_votes->execute();
         $stmt_votes->close();
         
-        // Commit the transaction if all deletions succeed
+        // Commit transaction
         $conn->commit();
         header("Location: manage_polls.php?message=PollDeleted");
         exit;

@@ -57,17 +57,27 @@ $stmt->close();
 
 // Insert a new vote or update an existing one
 if ($has_voted) {
+    // Update branch: parameter order is option_id, poll_id, user_id.
     $sql = "UPDATE votes SET option_id = ?, voted_at = CURRENT_TIMESTAMP WHERE poll_id = ? AND user_id = ?";
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        error_log("Prepare failed (vote update): " . $conn->error);
+        header("Location: error.php?error=DBError");
+        exit;
+    }
+    $stmt->bind_param("iii", $option_id, $poll_id, $user_id);
 } else {
+    // Insert branch: parameter order is poll_id, option_id, user_id.
     $sql = "INSERT INTO votes (poll_id, option_id, user_id) VALUES (?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        error_log("Prepare failed (vote insert): " . $conn->error);
+        header("Location: error.php?error=DBError");
+        exit;
+    }
+    $stmt->bind_param("iii", $poll_id, $option_id, $user_id);
 }
-$stmt = $conn->prepare($sql);
-if (!$stmt) {
-    error_log("Prepare failed (vote insert/update): " . $conn->error);
-    header("Location: error.php?error=DBError");
-    exit;
-}
-$stmt->bind_param("iii", $option_id, $poll_id, $user_id);
+
 if (!$stmt->execute()) {
     error_log("Vote submission failed: " . $stmt->error);
     header("Location: error.php?error=VoteFailed");

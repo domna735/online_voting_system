@@ -7,6 +7,11 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Generate CSRF token if one is not already set.
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 include('db_connect.php');
 
 $user_id = $_SESSION['user_id'];
@@ -19,7 +24,6 @@ if (!$stmt) {
     header("Location: error.php?error=DBError");
     exit;
 }
-
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -44,14 +48,29 @@ $result = $stmt->get_result();
             while ($row = $result->fetch_assoc()) {
                 // Sanitize the poll question for safe output.
                 $question = htmlspecialchars($row['question'], ENT_QUOTES, 'UTF-8');
-                // Cast poll_id to integer to ensure safety in URL parameters.
+                // Cast poll_id to integer to ensure safety.
                 $poll_id = intval($row['poll_id']);
                 
-                echo "<li>" . $question . " 
-                        <a href='vote.php?poll_id=" . $poll_id . "'>View</a> 
-                        <a href='edit_poll.php?poll_id=" . $poll_id . "'>Edit</a> 
-                        <a href='delete_poll.php?poll_id=" . $poll_id . "' onclick=\"return confirm('Are you sure you want to delete this poll?')\">Delete</a>
-                      </li>";
+                // Build View and Edit links normally,
+                // And use a POST form with hidden CSRF token for deletion.
+                echo "<li>" . $question . " ";
+                // For "View"
+                echo "<form action='vote.php' method='GET' style='display:inline; margin-right:5px;'>
+                        <input type='hidden' name='poll_id' value='" . $poll_id . "'>
+                        <button type='submit' class='link-button'>View</button>
+                    </form>";
+                // For "Edit"
+                echo "<form action='edit_poll.php' method='GET' style='display:inline;'>
+                        <input type='hidden' name='poll_id' value='" . $poll_id . "'>
+                        <button type='submit' class='link-button'>Edit</button>
+                    </form>";
+                // For "Delete"
+                echo "<form action='delete_poll.php' method='POST' style='display:inline;' onsubmit=\"return confirm('Are you sure you want to delete this poll?');\">";
+                echo "<input type='hidden' name='poll_id' value='" . $poll_id . "'>";
+                echo "<input type='hidden' name='csrf_token' value='" . $_SESSION['csrf_token'] . "'>";
+                echo "<button type='submit'>Delete</button>";
+                echo "</form>";
+                echo "</li>";
             }
             echo "</ul>";
         } else {
@@ -83,10 +102,10 @@ $result = $stmt->get_result();
                 $question = htmlspecialchars($row['question'], ENT_QUOTES, 'UTF-8');
                 $poll_id = intval($row['poll_id']);
                 
-                echo "<li>" . $question . " 
-                        <a href='vote.php?poll_id=" . $poll_id . "'>View</a> 
-                        <a href='view_results.php?poll_id=" . $poll_id . "'>View Results</a>
-                      </li>";
+                echo "<li>" . $question . " ";
+                echo "<a href='vote.php?poll_id=" . $poll_id . "'>View</a> ";
+                echo "<a href='view_results.php?poll_id=" . $poll_id . "'>View Results</a>";
+                echo "</li>";
             }
             echo "</ul>";
         } else {

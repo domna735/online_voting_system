@@ -14,22 +14,24 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_tok
     exit;
 }
 
-// Validate and sanitize input data
-$poll_id = isset($_POST['poll_id']) ? intval($_POST['poll_id']) : 0;
-if ($poll_id <= 0) {
+// Retrieve and validate input data using filter_input
+$poll_id = filter_input(INPUT_POST, 'poll_id', FILTER_VALIDATE_INT);
+if ($poll_id === false || $poll_id <= 0) {
     header("Location: error.php?error=InvalidPollId");
     exit;
 }
 
-$comment_text = isset($_POST['comment_text']) ? trim($_POST['comment_text']) : '';
+// Retrieve and sanitize comment text
+$comment_text = trim(filter_input(INPUT_POST, 'comment_text', FILTER_SANITIZE_STRING));
 if (empty($comment_text)) {
     header("Location: error.php?error=EmptyComment");
     exit;
 }
 
-// Sanitize comment text to prevent XSS when later displayed.
-// Alternatively, you can store raw text and sanitize on output.
+// Option 1: Sanitize before storing (as you're doing)
+// Option 2: Store raw comment and sanitize on output (consider for future improvements)
 $comment_text_sanitized = htmlspecialchars($comment_text, ENT_QUOTES, 'UTF-8');
+
 $user_id = $_SESSION['user_id'];
 
 // Insert comment into the database using a prepared statement
@@ -43,7 +45,7 @@ if (!$stmt) {
 $stmt->bind_param("iis", $poll_id, $user_id, $comment_text_sanitized);
 
 if ($stmt->execute()) {
-    // Redirect the user back to the voting page for the poll.
+    // Comment inserted successfully; redirect back to the vote page
     header("Location: vote.php?poll_id=" . $poll_id);
     exit;
 } else {
@@ -51,4 +53,5 @@ if ($stmt->execute()) {
     header("Location: error.php?error=CommentFailed");
     exit;
 }
+$stmt->close();
 ?>

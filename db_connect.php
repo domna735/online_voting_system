@@ -18,5 +18,5 @@ if ($conn->connect_error) {
 }
 
 // Set the character encoding to ensure correct data handling
-$conn->set_charset("utf8");
+$conn->set_charset("utf8mb4");
 ?>

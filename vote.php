@@ -175,15 +175,16 @@ if ($stmt) {
         <?php endif; ?>
         
         <?php if (isset($_SESSION['user_id'])): ?>
-            <h3>Leave a Comment</h3>
-            <form action="comment_process.php" method="POST">
-                <input type="hidden" name="poll_id" value="<?php echo $poll_id; ?>">
-                <textarea name="comment_text" required></textarea><br>
-                <button type="submit">Submit Comment</button>
-            </form>
-        <?php else: ?>
-            <p><a href="login.php">Log in</a> to leave a comment.</p>
-        <?php endif; ?>
+    <h3>Leave a Comment</h3>
+    <form action="comment_process.php" method="POST">
+        <input type="hidden" name="poll_id" value="<?php echo $poll_id; ?>">
+        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+        <textarea name="comment_text" required></textarea><br>
+        <button type="submit">Submit Comment</button>
+    </form>
+<?php else: ?>
+    <p><a href="login.php">Log in</a> to leave a comment.</p>
+<?php endif; ?>
     </main>
     <?php include('footer.php'); ?>
     
