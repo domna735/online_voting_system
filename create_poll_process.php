@@ -1,6 +1,9 @@
 <?php
 session_start();
+
+// Include the database connection and central sanitization functions
 include('db_connect.php');
+include('sanitization.php');
 
 // Ensure the user is logged in
 if (!isset($_SESSION['user_id'])) {
@@ -14,19 +17,18 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_tok
     exit;
 }
 
-// Function to sanitize user input and enforce a maximum length
-function test_input($data, $maxLength = 1000) {
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data);
-    return substr($data, 0, $maxLength);
-}
-
-// Retrieve and sanitize form data
 $user_id = $_SESSION['user_id'];
-$question = test_input($_POST['question'], 250);
-$content  = test_input($_POST['content'], 500);
-$options  = $_POST['options'];
+
+// Retrieve raw input using filter_input (FILTER_DEFAULT is used so the content remains intact)
+$raw_question = filter_input(INPUT_POST, 'question', FILTER_DEFAULT);
+$raw_content  = filter_input(INPUT_POST, 'content', FILTER_DEFAULT);
+
+// Use the sanitization function and enforce maximum length for poll question (250) and content (500)
+$question = substr(sanitize_input($raw_question), 0, 250);
+$content  = substr(sanitize_input($raw_content), 0, 500);
+
+// Retrieve poll options as an array
+$options = $_POST['options'];
 
 // Validate poll options: require at least 2 options and no more than 10
 if (!is_array($options) || count($options) < 2 || count($options) > 10) {
@@ -34,9 +36,9 @@ if (!is_array($options) || count($options) < 2 || count($options) > 10) {
     exit;
 }
 
-// Sanitize each option
+// Sanitize each poll option with a maximum length of 100 characters
 foreach ($options as $key => $option) {
-    $options[$key] = test_input($option, 100);
+    $options[$key] = substr(sanitize_input($option), 0, 100);
 }
 
 // Insert the poll question and content into the polls table
@@ -72,7 +74,7 @@ if ($stmt->execute()) {
     
     // Optionally, regenerate the session ID to mitigate session fixation
     // session_regenerate_id(true);
-
+    
     header('Location: polls.php');
     exit;
 } else {

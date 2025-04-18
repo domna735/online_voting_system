@@ -2,6 +2,9 @@
 session_start();
 include('db_connect.php');
 
+// Include the central sanitization functions file
+include('sanitization.php');
+
 // Redirect non‑authenticated users
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -14,20 +17,13 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_tok
     exit;
 }
 
-// Helper function to sanitize input and enforce a maximum length
-function test_input($data, $maxLength = 1000) {
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
-    return substr($data, 0, $maxLength);
-}
-
-// Retrieve and sanitize form data
-$poll_id = intval($_POST['poll_id']);
-$question = test_input($_POST['question'], 250);
-$content  = test_input($_POST['content'], 500);
-$options  = $_POST['options'];  // This is assumed to be an associative array: option_id => option_text
 $user_id  = $_SESSION['user_id'];
+$poll_id  = intval($_POST['poll_id']);
+
+// Sanitize input and enforce maximum lengths using the central function
+$question = substr(sanitize_input($_POST['question']), 0, 250);
+$content  = substr(sanitize_input($_POST['content']), 0, 500);
+$options  = $_POST['options'];  // This is assumed to be an associative array: option_id => option_text
 
 // Check if the poll belongs to the logged-in user
 $sql = "SELECT * FROM polls WHERE poll_id = ? AND user_id = ?";
@@ -64,7 +60,7 @@ $stmt_update->close();
 
 // Update each poll option
 foreach ($options as $option_id => $option_text) {
-    $sanitized_text = test_input($option_text, 100);
+    $sanitized_text = substr(sanitize_input($option_text), 0, 100);
     $sql = "UPDATE options SET option_text = ? WHERE option_id = ? AND poll_id = ?";
     $stmt_option = $conn->prepare($sql);
     if (!$stmt_option) {

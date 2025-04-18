@@ -1,6 +1,8 @@
 <?php
 session_start();
 include('db_connect.php');
+// Include the central sanitization functions if needed
+include('sanitization.php');
 
 // Ensure the user is logged in
 if (!isset($_SESSION['user_id'])) {
@@ -14,12 +16,12 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_tok
     exit;
 }
 
-// Retrieve and validate form data
-$poll_id   = isset($_POST['poll_id'])   ? intval($_POST['poll_id'])   : 0;
-$option_id = isset($_POST['option_id']) ? intval($_POST['option_id']) : 0;
+// Retrieve and validate form data using filter_input for integers
+$poll_id   = filter_input(INPUT_POST, 'poll_id', FILTER_VALIDATE_INT);
+$option_id = filter_input(INPUT_POST, 'option_id', FILTER_VALIDATE_INT);
 $user_id   = $_SESSION['user_id'];
 
-if ($poll_id <= 0 || $option_id <= 0) {
+if ($poll_id === false || $option_id === false || $poll_id <= 0 || $option_id <= 0) {
     header("Location: error.php?error=InvalidVoteInput");
     exit;
 }

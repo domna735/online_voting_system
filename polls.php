@@ -1,6 +1,38 @@
 <?php
 session_start();
 include('db_connect.php');
+
+// Function to validate and sanitize input
+function validate_input($data, $type = 'string', $max_length = 255) {
+    $data = trim($data);
+    $data = stripslashes($data);
+    
+    switch($type) {
+        case 'int':
+            return intval($data);
+        case 'string':
+            return substr(htmlspecialchars($data, ENT_QUOTES, 'UTF-8'), 0, $max_length);
+        default:
+            return htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
+    }
+}
+
+// Validate and sanitize any GET parameters
+$page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+$sort = isset($_GET['sort']) ? htmlspecialchars($_GET['sort'], ENT_QUOTES, 'UTF-8') : 'created_at';
+$order = isset($_GET['order']) ? htmlspecialchars($_GET['order'], ENT_QUOTES, 'UTF-8') : 'DESC';
+
+// Validate sort and order values against whitelist
+$allowed_sorts = ['created_at', 'question', 'creator'];
+$allowed_orders = ['ASC', 'DESC'];
+
+if (!in_array($sort, $allowed_sorts)) {
+    $sort = 'created_at';
+}
+if (!in_array($order, $allowed_orders)) {
+    $order = 'DESC';
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -22,23 +54,36 @@ include('db_connect.php');
                 <h2>All Polls</h2>
                 <ul>
                     <?php
-                    $sql = "SELECT polls.poll_id, polls.question, users.nickname AS creator
+                    // Use prepared statement with parameterized query
+                    $sql = "SELECT polls.poll_id, polls.question, users.nickname AS creator, polls.created_at
                             FROM polls
-                            JOIN users ON polls.user_id = users.user_id";
-                    $result = $conn->query($sql);
-                    if ($result && $result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                            // Sanitize output to avoid XSS attacks
-                            $question = htmlspecialchars($row['question'], ENT_QUOTES, 'UTF-8');
-                            $creator  = htmlspecialchars($row['creator'], ENT_QUOTES, 'UTF-8');
-                            $poll_id  = intval($row['poll_id']);
-                            
-                            echo "<li>" . $question . " <em>by " . $creator . "</em> " . 
-                                 "<a href='vote.php?poll_id=" . $poll_id . "'>Vote</a> " . 
-                                 "<a href='view_results.php?poll_id=" . $poll_id . "'>View Results</a></li>";
-                        }
+                            JOIN users ON polls.user_id = users.user_id
+                            ORDER BY " . $sort . " " . $order;
+                    
+                    $stmt = $conn->prepare($sql);
+                    if (!$stmt) {
+                        error_log("Prepare failed (fetch polls): " . $conn->error);
+                        echo "<li>An error occurred. Please try again later.</li>";
                     } else {
-                        echo "<li>No polls found.</li>";
+                        $stmt->execute();
+                        $result = $stmt->get_result();
+                        if ($result && $result->num_rows > 0) {
+                            while ($row = $result->fetch_assoc()) {
+                                // Sanitize output to avoid XSS attacks
+                                $question = htmlspecialchars($row['question'], ENT_QUOTES, 'UTF-8');
+                                $creator  = htmlspecialchars($row['creator'], ENT_QUOTES, 'UTF-8');
+                                $poll_id  = intval($row['poll_id']);
+                                $created_at = htmlspecialchars($row['created_at'], ENT_QUOTES, 'UTF-8');
+                                
+                                echo "<li>" . $question . " <em>by " . $creator . "</em> " . 
+                                     "<span class='date'>(" . $created_at . ")</span> " .
+                                     "<a href='vote.php?poll_id=" . $poll_id . "'>Vote</a> " . 
+                                     "<a href='view_results.php?poll_id=" . $poll_id . "'>View Results</a></li>";
+                            }
+                        } else {
+                            echo "<li>No polls found.</li>";
+                        }
+                        $stmt->close();
                     }
                     ?>
                 </ul>

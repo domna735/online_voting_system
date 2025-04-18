@@ -1,6 +1,8 @@
 <?php
 session_start();
 include('db_connect.php');
+// Include the central sanitization functions
+include('sanitization.php');
 
 // CSRF Token Verification
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
@@ -9,15 +11,10 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_tok
     exit;
 }
 
-// Function to sanitize user input
-function test_input($data) {
-    return htmlspecialchars(stripslashes(trim($data)), ENT_QUOTES, 'UTF-8');
-}
-
-// Get and sanitize form data
-$login_id = test_input($_POST['login_id']);
-$nickname = test_input($_POST['nickname']);
-$email    = test_input($_POST['email']);
+// Get and sanitize form data using our central function
+$login_id = sanitize_input($_POST['login_id']);
+$nickname = sanitize_input($_POST['nickname']);
+$email    = sanitize_input($_POST['email']);
 $password = $_POST['password']; // Do not alter password value—hashing takes care of safety.
 $confirm_password = $_POST['confirm_password'];
 
@@ -31,7 +28,8 @@ if ($password !== $confirm_password) {
 $profile_pic = '';
 if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
     $fileTmpPath = $_FILES['profile_picture']['tmp_name'];
-    $fileName = basename($_FILES['profile_picture']['name']);
+    // Use our central function to sanitize the file name
+    $fileName = sanitize_filename(basename($_FILES['profile_picture']['name']));
     $fileSize = $_FILES['profile_picture']['size'];
     $fileNameCmps = explode(".", $fileName);
     $fileExtension = strtolower(end($fileNameCmps));
@@ -53,7 +51,7 @@ if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] ===
             exit;
         }
 
-        // Sanitize file name and move it to the uploads directory
+        // Generate a unique file name and move it to the uploads directory
         $newFileName = md5(time() . $fileName) . '.' . $fileExtension;
         $uploadFileDir = 'uploads/';
         $destination = $uploadFileDir . $newFileName;

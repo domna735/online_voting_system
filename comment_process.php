@@ -1,5 +1,10 @@
 <?php
 session_start();
+
+// Include sanitization functions
+include('sanitization.php'); // Adjust the path if needed
+
+// Include the database connection file
 include('db_connect.php');
 
 // Ensure the user is logged in
@@ -14,27 +19,29 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_tok
     exit;
 }
 
-// Retrieve and validate input data using filter_input
+// Retrieve and validate input data
+// For poll_id we are using filter_input with validation
 $poll_id = filter_input(INPUT_POST, 'poll_id', FILTER_VALIDATE_INT);
 if ($poll_id === false || $poll_id <= 0) {
     header("Location: error.php?error=InvalidPollId");
     exit;
 }
 
-// Retrieve and sanitize comment text
-$comment_text = trim(filter_input(INPUT_POST, 'comment_text', FILTER_SANITIZE_STRING));
+// Retrieve raw comment text (using FILTER_DEFAULT so it is not altered too early)
+$raw_comment_text = filter_input(INPUT_POST, 'comment_text', FILTER_DEFAULT);
+
+// Use the custom sanitization function to clean the comment text
+$comment_text = sanitize_input($raw_comment_text);
+
+// Check for an empty comment (after sanitization)
 if (empty($comment_text)) {
     header("Location: error.php?error=EmptyComment");
     exit;
 }
 
-// Option 1: Sanitize before storing (as you're doing)
-// Option 2: Store raw comment and sanitize on output (consider for future improvements)
-$comment_text_sanitized = htmlspecialchars($comment_text, ENT_QUOTES, 'UTF-8');
-
 $user_id = $_SESSION['user_id'];
 
-// Insert comment into the database using a prepared statement
+// Insert the comment into the database using a prepared statement
 $sql = "INSERT INTO comments (poll_id, user_id, comment_text) VALUES (?, ?, ?)";
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
@@ -42,7 +49,7 @@ if (!$stmt) {
     header("Location: error.php?error=DBError");
     exit;
 }
-$stmt->bind_param("iis", $poll_id, $user_id, $comment_text_sanitized);
+$stmt->bind_param("iis", $poll_id, $user_id, $comment_text);
 
 if ($stmt->execute()) {
     // Comment inserted successfully; redirect back to the vote page
