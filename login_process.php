@@ -25,10 +25,15 @@ $result = $stmt->get_result();
 $row = $result->fetch_assoc();
 $attempts = $row['attempts'];
 
-// If too many attempts, block login
+// Clean up old login attempts from database
+$sql = "DELETE FROM login_attempts WHERE attempt_time < DATE_SUB(NOW(), INTERVAL 20 MINUTE)";
+$stmt = $conn->prepare($sql);
+$stmt->execute();
+
+// If too many attempts from this IP, block login
 if ($attempts >= 5) {
     error_log("Too many login attempts from IP: " . $ip);
-    header('Location: login_error.php?error=TooManyAttempts');
+    header('Location: login_error.php?error=TooManyAttemptsIP');
     exit;
 }
 
@@ -43,9 +48,14 @@ if ($result->num_rows === 1) {
     $user = $result->fetch_assoc();
     
     // Check if account is locked for a period due to failed attempts
-    if ($user['login_attempts'] >= 5 && strtotime($user['last_attempt']) > strtotime('-15 minutes')) {
+    // Convert current time minus 15 minutes to hk timezone (because stored hk time in database)
+    $currentTime = new DateTime('now', new DateTimeZone('Asia/Hong_Kong'));
+    $currentTime->modify('-15 minutes');
+    $convertedTime = $currentTime->format('Y-m-d H:i:s');
+    
+    if ($user['login_attempts'] >= 5 && $user['last_attempt'] > $convertedTime) {
         error_log("Account locked for user: " . $login_id);
-        header('Location: login_error.php?error=AccountLocked');
+        header('Location: login_error.php?error=TooManyAttemptsAcc');
         exit;
     }
     

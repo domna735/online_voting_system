@@ -1,5 +1,21 @@
 <?php
 session_start();
+$error_message = "User not found or incorrect password."; // Default error message
+
+// Check if an error parameter is passed in the URL
+if (isset($_GET['error'])) {
+    switch ($_GET['error']) {
+        case 'TooManyAttemptsIP':
+            $error_message = "Too many failed login attempts. Please try again after 15 minutes.";
+            break;
+        case 'TooManyAttemptsAcc':
+            $error_message = "Too many failed login attempts on this account. Please try again after 15 minutes.";
+            break;
+        case 'InvalidCSRFToken':
+            $error_message = "Invalid CSRF token. Please try again.";
+            break;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -18,7 +34,7 @@ session_start();
         <div id="loginPopup" class="popup" style="display: block;">
             <div class="popup-content">
                 <span class="close" onclick="closePopup()">&times;</span>
-                <div class="message">User not found or incorrect password.</div>
+                <div class="message"><?php echo htmlspecialchars($error_message); ?></div>
                 <div class="message">Do you have an account?</div>
                 <button class="button" onclick="location.href='login.php'">Log In</button>
                 <div class="message">If not, you can register here:</div>
