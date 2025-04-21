@@ -1,7 +1,4 @@
 <?php
-    ini_set('session.cookie_secure', '1'); // Enable Secure flag
-    ini_set('session.cookie_httponly', '1'); // Enable HttpOnly flag
-    ini_set('session.cookie_samesite', 'Strict'); // Set SameSite attribute
 function display_nav($type) {
     // Ensure session is started
     if (session_status() === PHP_SESSION_NONE) {
