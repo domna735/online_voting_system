@@ -1,4 +1,7 @@
 <?php
+ini_set('session.cookie_secure', '1'); // Enable Secure flag
+ini_set('session.cookie_httponly', '1'); // Enable HttpOnly flag
+ini_set('session.cookie_samesite', 'Strict'); // Set SameSite attribute
 session_start();
 
 // Retrieve the error code passed to the page

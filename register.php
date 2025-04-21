@@ -1,5 +1,8 @@
 <?php
 // Start the session at the very beginning
+ini_set('session.cookie_secure', '1'); // Enable Secure flag
+ini_set('session.cookie_httponly', '1'); // Enable HttpOnly flag
+ini_set('session.cookie_samesite', 'Strict'); // Set SameSite attribute
 session_start();
 
 // Generate a CSRF token if one doesn't exist

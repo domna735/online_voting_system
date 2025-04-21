@@ -1,6 +1,9 @@
 <?php
 function display_nav($type) {
     // Ensure session is started
+    ini_set('session.cookie_secure', '1'); // Enable Secure flag
+ini_set('session.cookie_httponly', '1'); // Enable HttpOnly flag
+ini_set('session.cookie_samesite', 'Strict'); // Set SameSite attribute
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
